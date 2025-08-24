@@ -39,7 +39,6 @@ export async function scapeTicketmasterPage(
 ): Promise<IEntryObject[]> {
   try {
     const browser = await puppeteer.launch({
-      executablePath: '/usr/bin/chromium',
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     const page = await browser.newPage();
