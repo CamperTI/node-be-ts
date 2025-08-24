@@ -39,8 +39,8 @@ export async function scapeTicketmasterPage(
 ): Promise<IEntryObject[]> {
   try {
     const browser = await puppeteer.launch({
-      executablePath:
-        '/opt/render/.cache/puppeteer/chrome/linux-136.0.7103.92/chrome-linux64/chrome',
+      executablePath: '/usr/bin/chromium',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
