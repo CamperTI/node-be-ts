@@ -8,4 +8,5 @@ WORKDIR /user/src/app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+EXPOSE 10000
 RUN npm run build
