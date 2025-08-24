@@ -74,7 +74,8 @@ export const hotSinChew = async (
   try {
     // Launch a headless browser
     const browser = await puppeteer.launch({
-      executablePath: '/usr/bin/google-chrome-stable',
+      executablePath:
+        '/opt/render/.cache/puppeteer/chrome/linux-136.0.7103.92/chrome-linux64/chrome',
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     const page = await browser.newPage();
@@ -112,6 +113,7 @@ export const hotSinChew = async (
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error fetching:', error.message);
+      return res.standardResponse(null, error.message, 500);
     } else {
       console.error('Error fetching:', error);
     }
