@@ -38,7 +38,10 @@ export async function scapeTicketmasterPage(
   mapRow: ($: cheerio.Root, row: cheerio.Element) => IEntryObject | null
 ): Promise<IEntryObject[]> {
   try {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      executablePath:
+        '/opt/render/.cache/puppeteer/chrome/linux-136.0.7103.92/chrome-linux64/chrome',
+    });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
 
