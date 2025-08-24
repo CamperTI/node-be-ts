@@ -73,7 +73,16 @@ export const hotSinChew = async (
 ) => {
   try {
     // Launch a headless browser
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      headless: 'shell', // or true depending on your Puppeteer version
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--no-zygote',
+      ],
+    });
     const page = await browser.newPage();
 
     await page.goto(hotUrl, { waitUntil: 'networkidle2' });
