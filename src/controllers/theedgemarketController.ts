@@ -37,8 +37,6 @@ export const theedgemarket = async (
     if (error instanceof Error) {
       console.error('Error fetching:', error.message);
       return res.standardResponse(null, error.message, 500);
-    } else {
-      console.error('Error fetching:', error);
     }
   }
 };

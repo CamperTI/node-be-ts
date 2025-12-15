@@ -37,6 +37,9 @@ export const kwongwah = async (
     // await cacheService.set(CACHE_KEY, dataResponse, DEFAULT_REDIS_CACHE);
     return res.standardResponse(dataResponse, 'Data fetch successfully');
   } catch (error) {
-    return res.standardResponse([], 'Failed');
+    if (error instanceof Error) {
+      console.error('Error fetching:', error.message);
+      return res.standardResponse(null, error.message, 500);
+    }
   }
 };

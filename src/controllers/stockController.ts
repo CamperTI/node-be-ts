@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import puppeteer from 'puppeteer';
 import * as cheerio from 'cheerio';
-import { autoScroll, createEntryObject } from '../utils/shared';
+import { autoScroll } from '../utils/shared';
 import { IEntryObject } from '../types/news';
 
 const stocksURl = `https://finance.yahoo.com/quote`;
@@ -46,8 +46,7 @@ export const stocks = async (
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error fetching:', error.message);
-    } else {
-      console.error('Error fetching:', error);
+      return res.standardResponse(null, error.message, 500);
     }
   }
 };

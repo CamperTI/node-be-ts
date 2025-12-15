@@ -41,8 +41,7 @@ export const guangming = async (
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error fetching:', error.message);
-    } else {
-      console.error('Error fetching:', error);
+      return res.standardResponse(null, error.message, 500);
     }
   }
 };
