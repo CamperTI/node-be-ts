@@ -1,8 +1,7 @@
 import puppeteer, { Browser } from 'puppeteer';
+import { execSync } from 'child_process';
 
 export const getPuppeteerConfig = () => {
-  const isProduction = process.env.NODE_ENV === 'production';
-
   const config: {
     headless: boolean;
     args: string[];
@@ -20,9 +19,18 @@ export const getPuppeteerConfig = () => {
     ],
   };
 
-  // In production (Render), use the cached Chrome executable
-  if (isProduction) {
-    config.executablePath = '/opt/render/.cache/puppeteer/chrome/linux-136.0.7103.92/chrome-linux64/chrome';
+  // Try to find Chrome executable automatically
+  try {
+    const executablePath = execSync('npx puppeteer browsers path chrome', {
+      encoding: 'utf8',
+    }).trim();
+
+    if (executablePath) {
+      config.executablePath = executablePath;
+      console.log('Using Chrome at:', executablePath);
+    }
+  } catch (error) {
+    console.warn('Could not find Chrome executable automatically, using default');
   }
 
   return config;
