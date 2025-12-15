@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import puppeteer from 'puppeteer';
 import * as cheerio from 'cheerio';
 import { createEntryObject } from '../utils/shared';
 import { RedisCacheService } from '../services/RedisCacheService';
 import { DEFAULT_REDIS_CACHE } from '../utils/const';
+import { launchBrowser } from '../config/puppeteer';
 
 const url = 'https://coursevania.com/courses/';
 
@@ -23,7 +23,7 @@ export const course = async (
     //   return res.standardResponse(cached, 'Data fetch successfully (cache)');
     // }
 
-    const browser = await puppeteer.launch();
+    const browser = await launchBrowser();
     const page = await browser.newPage();
 
     await page.goto(url, { waitUntil: 'networkidle2' });

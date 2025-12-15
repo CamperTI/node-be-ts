@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import puppeteer from 'puppeteer';
 import * as cheerio from 'cheerio';
+import { launchBrowser } from '../config/puppeteer';
 
 const url = 'https://dividends.my/aeon-6599/'; //'https://dividends.my/maybank-1155/';
 
@@ -13,7 +13,7 @@ export const dividends = async (
 ) => {
   try {
     // Launch a headless browser
-    const browser = await puppeteer.launch();
+    const browser = await launchBrowser();
     const page = await browser.newPage();
 
     await page.goto(url, { waitUntil: 'networkidle2' });

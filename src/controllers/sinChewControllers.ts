@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import puppeteer from 'puppeteer';
 import * as cheerio from 'cheerio';
 import { autoScroll, createEntryObject } from '../utils/shared';
 import { IEntryObject } from '../types/news';
 import { RedisCacheService } from '../services/RedisCacheService';
 import { scrapeNewsPage } from '../utils/scrapeNewsPage';
 import { DEFAULT_REDIS_CACHE } from '../utils/const';
+import { launchBrowser } from '../config/puppeteer';
 
 const url =
   'https://www.sinchew.com.my/category/%e8%b4%a2%e7%bb%8f/%e5%9b%bd%e9%99%85%e8%b4%a2%e7%bb%8f';
@@ -73,11 +73,7 @@ export const hotSinChew = async (
 ) => {
   try {
     // Launch a headless browser
-    const browser = await puppeteer.launch({
-      executablePath:
-        '/opt/render/.cache/puppeteer/chrome/linux-136.0.7103.92/chrome-linux64/chrome',
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
+    const browser = await launchBrowser();
     const page = await browser.newPage();
 
     await page.goto(hotUrl, { waitUntil: 'networkidle2' });

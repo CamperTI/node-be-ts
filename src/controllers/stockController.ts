@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import puppeteer from 'puppeteer';
 import * as cheerio from 'cheerio';
 import { autoScroll } from '../utils/shared';
 import { IEntryObject } from '../types/news';
+import { launchBrowser } from '../config/puppeteer';
 
 const stocksURl = `https://finance.yahoo.com/quote`;
 
@@ -18,7 +18,7 @@ export const stocks = async (
       .map((code) => code.trim().toUpperCase());
     var dataResponse: IEntryObject[] = [];
 
-    const browser = await puppeteer.launch();
+    const browser = await launchBrowser();
     const page = await browser.newPage();
 
     for (const stockCode of stockCodes) {

@@ -1,6 +1,7 @@
-import puppeteer, { Page } from 'puppeteer';
+import { Page } from 'puppeteer';
 import * as cheerio from 'cheerio';
 import { IEntryObject } from '../types/news';
+import { launchBrowser } from '../config/puppeteer';
 
 export async function scrapeNewsPage(
   url: string,
@@ -8,7 +9,7 @@ export async function scrapeNewsPage(
   mapRow: ($: cheerio.Root, row: cheerio.Element) => IEntryObject | null,
   autoScrollFn?: (page: Page) => Promise<void>
 ): Promise<IEntryObject[]> {
-  const browser = await puppeteer.launch();
+  const browser = await launchBrowser();
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: 'networkidle2' });
 
@@ -38,9 +39,7 @@ export async function scapeTicketmasterPage(
   mapRow: ($: cheerio.Root, row: cheerio.Element) => IEntryObject | null
 ): Promise<IEntryObject[]> {
   try {
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
+    const browser = await launchBrowser();
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
 
