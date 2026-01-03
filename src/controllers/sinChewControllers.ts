@@ -6,7 +6,7 @@ import { IEntryObject } from '../types/news';
 import { RedisCacheService } from '../services/RedisCacheService';
 import { scrapeNewsPage } from '../utils/scrapeNewsPage';
 import { DEFAULT_REDIS_CACHE } from '../utils/const';
-import { launchBrowser } from '../config/puppeteer';
+import { launchBrowser, createPage } from '../config/puppeteer';
 
 type CheerioAPI = ReturnType<typeof cheerio.load>;
 
@@ -77,9 +77,10 @@ export const hotSinChew = async (
   try {
     // Launch a headless browser
     const browser = await launchBrowser();
-    const page = await browser.newPage();
+    const page = await createPage(browser);
 
-    await page.goto(hotUrl, { waitUntil: 'networkidle2' });
+    // Use 'domcontentloaded' instead of 'networkidle2' for faster loading
+    await page.goto(hotUrl, { waitUntil: 'domcontentloaded' });
 
     await page.waitForSelector(
       'h3.skip-default-style.hot-posts-toggle-item.hot-posts-toggle-item-24h'

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as cheerio from 'cheerio';
-import { launchBrowser } from '../config/puppeteer';
+import { launchBrowser, createPage } from '../config/puppeteer';
 
 const url = 'https://dividends.my/aeon-6599/'; //'https://dividends.my/maybank-1155/';
 
@@ -14,9 +14,9 @@ export const dividends = async (
   try {
     // Launch a headless browser
     const browser = await launchBrowser();
-    const page = await browser.newPage();
+    const page = await createPage(browser);
 
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
 
     // Function to scroll to the bottom of the page
     async function autoScroll(page: any) {

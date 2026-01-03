@@ -1,11 +1,14 @@
-import puppeteer, { Browser } from "puppeteer";
+import puppeteer, { Browser, Page } from "puppeteer";
+
+// Navigation timeout in milliseconds (2 minutes for slow servers)
+export const NAVIGATION_TIMEOUT = 120000;
 
 export const launchBrowser = async (): Promise<Browser> => {
   const executablePath = puppeteer.executablePath();
 
   console.log("Using Chrome at:", executablePath);
 
-  return puppeteer.launch({
+  const browser = await puppeteer.launch({
     executablePath,
     headless: true,
     args: [
@@ -26,4 +29,28 @@ export const launchBrowser = async (): Promise<Browser> => {
       "--disable-backgrounding-occluded-windows"
     ]
   });
+
+  return browser;
+};
+
+export const createPage = async (browser: Browser): Promise<Page> => {
+  const page = await browser.newPage();
+
+  // Set longer timeout for slow servers
+  page.setDefaultNavigationTimeout(NAVIGATION_TIMEOUT);
+  page.setDefaultTimeout(NAVIGATION_TIMEOUT);
+
+  // Block unnecessary resources to speed up loading
+  await page.setRequestInterception(true);
+  page.on('request', (request) => {
+    const resourceType = request.resourceType();
+    // Block images, stylesheets, fonts to speed up page load
+    if (['image', 'stylesheet', 'font', 'media'].includes(resourceType)) {
+      request.abort();
+    } else {
+      request.continue();
+    }
+  });
+
+  return page;
 };
