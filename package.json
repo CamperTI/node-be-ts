@@ -175,19 +175,19 @@
     "zod": "^3.24.4",
     "zod-to-json-schema": "^3.24.5",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0"
-  },
-  "devDependencies": {
+    "express": "^5.1.0",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.1",
     "@types/node": "^22.15.17",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
     "eslint": "^9.26.0",
     "install": "^0.13.0",
     "nodemon": "^3.1.10",
     "npm": "^11.3.0",
     "prettier": "^3.5.3",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "ts-node": "^10.9.2"
   },
   "keywords": [],
   "author": "",
