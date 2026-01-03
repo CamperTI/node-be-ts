@@ -1,14 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
+import * as cheerio from 'cheerio';
+import type { AnyNode } from 'domhandler';
 import { autoScroll, createEntryObject } from '../utils/shared';
 import { RedisCacheService } from '../services/RedisCacheService';
 import { DEFAULT_REDIS_CACHE } from '../utils/const';
 import { scrapeNewsPage } from '../utils/scrapeNewsPage';
 
+type CheerioAPI = ReturnType<typeof cheerio.load>;
+
 const categoryNewsUrl =
   'https://www.kwongwah.com.my/category/%e5%9b%bd%e9%99%85%e6%96%b0%e9%97%bb/';
 const listSelector = '.td_block_wrap .td-block-row';
 
-function kwongwahMapRow($: cheerio.Root, row: cheerio.Element) {
+function kwongwahMapRow($: CheerioAPI, row: AnyNode) {
   const title = $(row).find('.td-module-thumb a').attr('title');
   const link = $(row).find('.td-module-thumb a').attr('href');
   return title ? createEntryObject(title, link) : null;

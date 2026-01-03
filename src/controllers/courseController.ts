@@ -43,7 +43,7 @@ export const course = async (
     const tableList = $(
       `.stm_lms_courses__grid.stm_lms_courses__grid_4.stm_lms_courses__grid_center.archive_grid`
     ).children();
-    tableList.each(async (index, row) => {
+    tableList.each((index, row) => {
       let title = $(row)
         .find(
           '.stm_lms_courses__single__inner .stm_lms_courses__single--title a h5'

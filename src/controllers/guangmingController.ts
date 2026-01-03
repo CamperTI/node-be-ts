@@ -1,15 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
+import * as cheerio from 'cheerio';
+import type { AnyNode } from 'domhandler';
 import { createEntryObject } from '../utils/shared';
 import { IEntryObject } from '../types/news';
 import { DEFAULT_REDIS_CACHE } from '../utils/const';
 import { RedisCacheService } from '../services/RedisCacheService';
 import { scrapeNewsPage } from '../utils/scrapeNewsPage';
 
+type CheerioAPI = ReturnType<typeof cheerio.load>;
+
 const categoryNewsUrl = 'https://guangming.com.my/topic/%e7%8b%ac%e5%ae%b6';
 
 const listSelector = '.mag-box-container .posts-items';
 
-function mapRow($: cheerio.Root, row: cheerio.Element) {
+function mapRow($: CheerioAPI, row: AnyNode) {
   let title = $(row).find('a.post-thumb').attr('aria-label');
   let link = $(row).find('a.post-thumb').attr('href');
   let time = $(row).find('.post-meta .meta-item').text();

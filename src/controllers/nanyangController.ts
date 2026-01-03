@@ -1,14 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
+import * as cheerio from 'cheerio';
+import type { AnyNode } from 'domhandler';
 import { createEntryObject } from '../utils/shared';
 import { RedisCacheService } from '../services/RedisCacheService';
 import { scrapeNewsPage } from '../utils/scrapeNewsPage';
 import { DEFAULT_REDIS_CACHE } from '../utils/const';
 
+type CheerioAPI = ReturnType<typeof cheerio.load>;
+
 const url = 'https://www.enanyang.my/';
 
 const listSelector = '#article-listing-wrapper .home-page-articles';
 
-function mapRow($: cheerio.Root, row: cheerio.Element) {
+function mapRow($: CheerioAPI, row: AnyNode) {
   let title = $(row).find('a').text().trim();
   let link = $(row).find('a').attr('href');
   let time = $(row).find('.metadata .time').text().trim();

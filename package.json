@@ -178,7 +178,6 @@
     "express": "^5.1.0"
   },
   "devDependencies": {
-    "@types/cheerio": "^0.22.35",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.1",
     "@types/node": "^22.15.17",

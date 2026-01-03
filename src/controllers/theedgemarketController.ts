@@ -1,15 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
+import * as cheerio from 'cheerio';
+import type { AnyNode } from 'domhandler';
 import { RedisCacheService } from '../services/RedisCacheService';
 import { createEntryObject } from '../utils/shared';
 import { scrapeNewsPage } from '../utils/scrapeNewsPage';
 import { DEFAULT_REDIS_CACHE } from '../utils/const';
+
+type CheerioAPI = ReturnType<typeof cheerio.load>;
 
 const url = 'https://theedgemalaysia.com/categories/news';
 
 const listSelector =
   '.NewsList_newsListWrap__yFGqL .NewsList_newsListContent__4UpiN';
 
-function mapRow($: cheerio.Root, row: cheerio.Element) {
+function mapRow($: CheerioAPI, row: AnyNode) {
   let title = $(row).find('.NewsList_newsListItemHead__dg7eK').text().trim();
   let link = $(row).find('.NewsList_newsListText__hstO7 a').attr('href');
   let time = $(row).find('.NewsList_infoNewsListSub__Ui2_Z span').text();

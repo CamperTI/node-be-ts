@@ -1,11 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import * as cheerio from 'cheerio';
+import type { AnyNode } from 'domhandler';
 import { autoScroll, createEntryObject } from '../utils/shared';
 import { IEntryObject } from '../types/news';
 import { RedisCacheService } from '../services/RedisCacheService';
 import { scrapeNewsPage } from '../utils/scrapeNewsPage';
 import { DEFAULT_REDIS_CACHE } from '../utils/const';
 import { launchBrowser } from '../config/puppeteer';
+
+type CheerioAPI = ReturnType<typeof cheerio.load>;
 
 const url =
   'https://www.sinchew.com.my/category/%e8%b4%a2%e7%bb%8f/%e5%9b%bd%e9%99%85%e8%b4%a2%e7%bb%8f';
@@ -38,7 +41,7 @@ export const testSinChew = (
   }
 };
 
-function sinChewMapRow($: cheerio.Root, row: cheerio.Element) {
+function sinChewMapRow($: CheerioAPI, row: AnyNode) {
   let title = $(row).find('h2.title a').text().trim();
   let link = $(row).find('a.internalLink').attr('href');
   return title ? createEntryObject(title, link, '') : null;
@@ -94,7 +97,7 @@ export const hotSinChew = async (
 
     const tableList = $(`#cat-post-list-1D .horizontal-post-frame`).children();
 
-    tableList.each(async (index, row) => {
+    tableList.each((index, row) => {
       let title = $(row).find('a.internalLink').text().trim();
       let link = $(row).find('a.internalLink').attr('href');
       // let time = $(row).find('.meta span.time').text()

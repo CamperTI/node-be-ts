@@ -46,7 +46,7 @@ export const dividends = async (
     const $ = cheerio.load(content);
 
     const tableList = $(`#table_3 tbody`).children();
-    tableList.each(async (index, row) => {
+    tableList.each((index, row) => {
       let title = $(row).find('td.column-year').text().trim();
       let dy = $(row).find('td.column-dy').text().trim();
       let cyield = $(row).find('td.column-yield').text().trim();

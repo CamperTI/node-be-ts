@@ -15,7 +15,7 @@ export const stocks = async (
     const stockCodesParam = req.params.stockCode || 'AAPL';
     const stockCodes = stockCodesParam
       .split(',')
-      .map((code) => code.trim().toUpperCase());
+      .map((code: string) => code.trim().toUpperCase());
     var dataResponse: IEntryObject[] = [];
 
     const browser = await launchBrowser();

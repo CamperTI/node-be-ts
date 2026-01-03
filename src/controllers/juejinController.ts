@@ -1,14 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
+import * as cheerio from 'cheerio';
+import type { AnyNode } from 'domhandler';
 import { createEntryObject } from '../utils/shared';
 import { RedisCacheService } from '../services/RedisCacheService';
 import { DEFAULT_REDIS_CACHE } from '../utils/const';
 import { scrapeNewsPage } from '../utils/scrapeNewsPage';
 
+type CheerioAPI = ReturnType<typeof cheerio.load>;
+
 const url = 'https://juejin.cn/frontend';
 
 const listSelector = '.entry-list.list';
 
-function mapRow($: cheerio.Root, row: cheerio.Element) {
+function mapRow($: CheerioAPI, row: AnyNode) {
   const title = $(row).find('a.jj-link.title').text().trim();
   const link = $(row).find('a.jj-link.title').attr('href');
   const time = $(row).find('.post-meta .post_date_meta').text().trim();

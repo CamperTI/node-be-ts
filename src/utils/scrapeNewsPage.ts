@@ -1,12 +1,15 @@
 import { Page } from 'puppeteer';
 import * as cheerio from 'cheerio';
+import type { AnyNode } from 'domhandler';
 import { IEntryObject } from '../types/news';
 import { launchBrowser } from '../config/puppeteer';
+
+type CheerioAPI = ReturnType<typeof cheerio.load>;
 
 export async function scrapeNewsPage(
   url: string,
   listSelector: string,
-  mapRow: ($: cheerio.Root, row: cheerio.Element) => IEntryObject | null,
+  mapRow: ($: CheerioAPI, row: AnyNode) => IEntryObject | null,
   autoScrollFn?: (page: Page) => Promise<void>
 ): Promise<IEntryObject[]> {
   const browser = await launchBrowser();
@@ -27,7 +30,7 @@ export async function scrapeNewsPage(
   console.log('tablelist', tableList.length);
 
   tableList.each((_, row) => {
-    const entry = mapRow($, row);
+    const entry = mapRow($, row as unknown as AnyNode);
     if (entry) dataResponse.push(entry);
   });
   return dataResponse;
@@ -36,7 +39,7 @@ export async function scrapeNewsPage(
 export async function scapeTicketmasterPage(
   url: string,
   listSelector: string,
-  mapRow: ($: cheerio.Root, row: cheerio.Element) => IEntryObject | null
+  mapRow: ($: CheerioAPI, row: AnyNode) => IEntryObject | null
 ): Promise<IEntryObject[]> {
   try {
     const browser = await launchBrowser();
