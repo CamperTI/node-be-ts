@@ -24,12 +24,32 @@ RUN apt-get update && apt-get install -y \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+
+# Copy package files
 COPY package*.json ./
-RUN npm install \
+
+# Install all dependencies (including dev) and Chrome
+RUN npm ci \
   && npx puppeteer browsers install chrome
 
+# Copy source files
 COPY . .
+
+# Build TypeScript
 RUN npm run build
 
+# Remove devDependencies to reduce image size
+RUN npm prune --production
+
+# Create non-root user for security
+RUN useradd -m -u 1001 nodeuser \
+  && chown -R nodeuser:nodeuser /app
+
+USER nodeuser
+
+# Expose port (Render uses PORT env var, which defaults to 10000)
 EXPOSE 10000
+
+ENV NODE_ENV=production
+
 CMD ["node", "dist/server.js"]
