@@ -173,16 +173,16 @@
     "yn": "^3.1.1",
     "yocto-queue": "^0.1.0",
     "zod": "^3.24.4",
-    "zod-to-json-schema": "^3.24.5"
+    "zod-to-json-schema": "^3.24.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.35",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.1",
     "@types/node": "^22.15.17",
-    "dotenv": "^16.5.0",
     "eslint": "^9.26.0",
-    "express": "^5.1.0",
     "install": "^0.13.0",
     "nodemon": "^3.1.10",
     "npm": "^11.3.0",
