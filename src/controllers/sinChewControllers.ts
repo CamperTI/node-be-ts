@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as cheerio from 'cheerio';
 import type { AnyNode } from 'domhandler';
+import type { Page } from 'puppeteer';
 import { autoScroll, createEntryObject } from '../utils/shared';
 import { IEntryObject } from '../types/news';
 import { RedisCacheService } from '../services/RedisCacheService';
@@ -74,10 +75,12 @@ export const hotSinChew = async (
   res: Response,
   next: NextFunction
 ) => {
+  let page: Page | null = null;
+
   try {
-    // Launch a headless browser
+    // Launch a headless browser (reuses existing instance)
     const browser = await launchBrowser();
-    const page = await createPage(browser);
+    page = await createPage(browser);
 
     // Use 'domcontentloaded' instead of 'networkidle2' for faster loading
     await page.goto(hotUrl, { waitUntil: 'domcontentloaded' });
@@ -108,7 +111,7 @@ export const hotSinChew = async (
         dataResponse.push(entryObject);
       }
     });
-    await browser.close();
+
     return res.standardResponse(dataResponse, 'Data fetch successfully');
   } catch (error) {
     if (error instanceof Error) {
@@ -118,5 +121,10 @@ export const hotSinChew = async (
       console.error('Error fetching:', error);
     }
     return res.standardResponse(dataResponse, 'Failed');
+  } finally {
+    // Always close the page to free resources
+    if (page) {
+      await page.close().catch(err => console.error('Error closing page:', err));
+    }
   }
 };
