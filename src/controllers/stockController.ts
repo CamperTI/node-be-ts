@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import * as cheerio from 'cheerio';
 import { autoScroll } from '../utils/shared';
 import { IEntryObject } from '../types/news';
-import { launchBrowser } from '../config/puppeteer';
+import { launchBrowser, createPage } from '../config/puppeteer';
 
 const stocksURl = `https://finance.yahoo.com/quote`;
 
@@ -19,11 +19,11 @@ export const stocks = async (
     var dataResponse: IEntryObject[] = [];
 
     const browser = await launchBrowser();
-    const page = await browser.newPage();
+    const page = await createPage(browser);
 
     for (const stockCode of stockCodes) {
       await page.goto(`${stocksURl}/${stockCode}`, {
-        waitUntil: 'networkidle2',
+        waitUntil: 'domcontentloaded',
       });
       await autoScroll(page);
 

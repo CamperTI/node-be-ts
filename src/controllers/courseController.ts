@@ -3,7 +3,7 @@ import * as cheerio from 'cheerio';
 import { createEntryObject } from '../utils/shared';
 import { RedisCacheService } from '../services/RedisCacheService';
 import { DEFAULT_REDIS_CACHE } from '../utils/const';
-import { launchBrowser } from '../config/puppeteer';
+import { launchBrowser, createPage } from '../config/puppeteer';
 
 const url = 'https://coursevania.com/courses/';
 
@@ -24,9 +24,9 @@ export const course = async (
     // }
 
     const browser = await launchBrowser();
-    const page = await browser.newPage();
+    const page = await createPage(browser);
 
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
 
     for (let i = 0; i < maxClicks; i++) {
       // Wait for the button to be available
