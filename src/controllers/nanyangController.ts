@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as cheerio from 'cheerio';
 import type { AnyNode } from 'domhandler';
-import { createEntryObject } from '../utils/shared';
+import { autoScroll, createEntryObject } from '../utils/shared';
 import { RedisCacheService } from '../services/RedisCacheService';
 import { scrapeNewsPage } from '../utils/scrapeNewsPage';
 import { DEFAULT_REDIS_CACHE } from '../utils/const';
@@ -10,31 +10,35 @@ type CheerioAPI = ReturnType<typeof cheerio.load>;
 
 const url = 'https://www.enanyang.my/';
 
-const listSelector = '#article-listing-wrapper .home-page-articles';
+const listSelector = '#home-page-3-other-healines-wrapper';
 
 function mapRow($: CheerioAPI, row: AnyNode) {
   let title = $(row).find('a').text().trim();
   let link = $(row).find('a').attr('href');
-  let time = $(row).find('.metadata .time').text().trim();
+  let time = $(row).find('.vertical-post-date').text().trim();
   return title ? createEntryObject(title, link, time) : null;
 }
 
 export const nanyang = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
-    // const cacheService = new RedisCacheService();
+    const cacheService = new RedisCacheService();
     const CACHE_KEY = 'news:nanyang';
+    const cached = await cacheService.get(CACHE_KEY);
+    if (cached && Array.isArray(cached) && cached.length > 0) {
+      return res.standardResponse(cached, 'Data fetch successfully (cache)');
+    }
 
-    // const cached = await cacheService.get(CACHE_KEY);
-    // if (cached) {
-    //   return res.standardResponse(cached, 'Data fetch successfully (cache)');
-    // }
-
-    const dataResponse = await scrapeNewsPage(url, listSelector, mapRow);
-    // await cacheService.set(CACHE_KEY, dataResponse, DEFAULT_REDIS_CACHE);
+    const dataResponse = await scrapeNewsPage(
+      url,
+      listSelector,
+      mapRow,
+      autoScroll,
+    );
+    await cacheService.set(CACHE_KEY, dataResponse, DEFAULT_REDIS_CACHE);
     return res.standardResponse(dataResponse, 'Data fetch successfully');
   } catch (error) {
     if (error instanceof Error) {

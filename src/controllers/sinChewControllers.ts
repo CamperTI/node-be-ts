@@ -7,7 +7,13 @@ import { IEntryObject } from '../types/news';
 import { RedisCacheService } from '../services/RedisCacheService';
 import { scrapeNewsPage } from '../utils/scrapeNewsPage';
 import { DEFAULT_REDIS_CACHE } from '../utils/const';
-import { launchBrowser, createPage } from '../config/puppeteer';
+import {
+  launchBrowser,
+  createPage,
+  navigateTo,
+  acquirePageSlot,
+  releasePageSlot,
+} from '../config/puppeteer';
 
 type CheerioAPI = ReturnType<typeof cheerio.load>;
 
@@ -23,7 +29,7 @@ const listSelector = '#catZone2 #cat-post-list';
 export const testSinChew = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     // Example response data
@@ -51,19 +57,19 @@ function sinChewMapRow($: CheerioAPI, row: AnyNode) {
 export const sinChew = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  // const cacheService = new RedisCacheService();
+  const cacheService = new RedisCacheService();
   const CACHE_KEY = 'news:sinChew';
 
   try {
-    // const cached = await cacheService.get(CACHE_KEY);
-    // if (cached) {
-    //   return res.standardResponse(cached, 'Data fetch successfully (cache)');
-    // }
+    const cached = await cacheService.get(CACHE_KEY);
+    if (cached && Array.isArray(cached) && cached.length > 0) {
+      return res.standardResponse(cached, 'Data fetch successfully (cache)');
+    }
 
     const dataResponse = await scrapeNewsPage(url, listSelector, sinChewMapRow);
-    // await cacheService.set(CACHE_KEY, dataResponse, DEFAULT_REDIS_CACHE);
+    await cacheService.set(CACHE_KEY, dataResponse, DEFAULT_REDIS_CACHE);
     return res.standardResponse(dataResponse, 'Data fetch successfully');
   } catch (error) {
     return res.standardResponse([], 'Failed');
@@ -73,23 +79,22 @@ export const sinChew = async (
 export const hotSinChew = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   let page: Page | null = null;
 
+  await acquirePageSlot();
   try {
-    // Launch a headless browser (reuses existing instance)
     const browser = await launchBrowser();
     page = await createPage(browser);
 
-    // Use 'domcontentloaded' instead of 'networkidle2' for faster loading
-    await page.goto(hotUrl, { waitUntil: 'domcontentloaded' });
+    await navigateTo(page, hotUrl);
 
     await page.waitForSelector(
-      'h3.skip-default-style.hot-posts-toggle-item.hot-posts-toggle-item-24h'
+      'h3.skip-default-style.hot-posts-toggle-item.hot-posts-toggle-item-24h',
     );
     await page.click(
-      '.skip-default-style.hot-posts-toggle-item.hot-posts-toggle-item-24h'
+      '.skip-default-style.hot-posts-toggle-item.hot-posts-toggle-item-24h',
     );
 
     // Scroll to the bottom to trigger lazy loading
@@ -122,9 +127,11 @@ export const hotSinChew = async (
     }
     return res.standardResponse(dataResponse, 'Failed');
   } finally {
-    // Always close the page to free resources
     if (page) {
-      await page.close().catch(err => console.error('Error closing page:', err));
+      await page
+        .close()
+        .catch((err) => console.error('Error closing page:', err));
     }
+    releasePageSlot();
   }
 };

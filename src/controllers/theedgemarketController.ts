@@ -23,19 +23,20 @@ function mapRow($: CheerioAPI, row: AnyNode) {
 export const theedgemarket = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
-    // const cacheService = new RedisCacheService();
+    const cacheService = new RedisCacheService();
     const CACHE_KEY = 'news:theedgemarket';
 
-    // const cached = await cacheService.get(CACHE_KEY);
-    // if (cached) {
-    //   return res.standardResponse(cached, 'Data fetch successfully (cache)');
-    // }
+    const cached = await cacheService.get(CACHE_KEY);
+
+    if (cached && Array.isArray(cached) && cached.length > 0) {
+      return res.standardResponse(cached, 'Data fetch successfully (cache)');
+    }
 
     const dataResponse = await scrapeNewsPage(url, listSelector, mapRow);
-    // await cacheService.set(CACHE_KEY, dataResponse, DEFAULT_REDIS_CACHE);
+    await cacheService.set(CACHE_KEY, dataResponse, DEFAULT_REDIS_CACHE);
     return res.standardResponse(dataResponse, 'Data fetch successfully');
   } catch (error) {
     if (error instanceof Error) {
