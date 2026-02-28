@@ -1,17 +1,39 @@
 services:
   - type: web
-    name: my-puppeteer-scraper
-    runtime: node
-    plan: free
-    buildCommand: |-
-      apt-get update
-      apt-get install -yq gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget
-      npm install
-      npx puppeteer browsers install chrome
-      npm run build
-    startCommand: node dist/server.js
+    name: nodejs-cheerio-ts
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    region: singapore # Options: oregon, ohio, frankfurt, singapore
+    plan: standard    # Puppeteer needs RAM; standard = 2GB ($25/mo)
+                      # Use "starter" ($7/mo, 512MB) only if scraping is light
+    healthCheckPath: /
     envVars:
-      - key: NODE_VERSION
-        value: 22.14.0
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 3000
+      - key: CORS_ORIGIN
+        value: "*" # Replace with your actual frontend URL e.g. https://yourapp.com
+      - key: REDIS_ENABLED
+        value: "true"
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: nodejs-cheerio-ts-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: nodejs-cheerio-ts-redis
+          property: port
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: "true"
+      - key: PUPPETEER_EXECUTABLE_PATH
+        value: /usr/bin/google-chrome-stable
+
+  - type: redis
+    name: nodejs-cheerio-ts-redis
+    region: singapore # Must match web service region above
+    plan: free        # free = 25MB RAM, no persistence; upgrade if caching is heavy
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []   # Empty = only allow internal Render services (recommended)
