@@ -31,6 +31,7 @@ export async function scrapeNewsPage(
     }
 
     const content = await page.content();
+    console.log('Page content preview:', content.slice(0, 500));
     const $ = cheerio.load(content);
     const dataResponse: IEntryObject[] = [];
     const tableList = $(listSelector).children();

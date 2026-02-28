@@ -15,7 +15,3 @@ services:
         value: 22.14.0
       - key: NODE_ENV
         value: production
-      - key: PUPPETEER_CACHE_DIR
-        value: /opt/render/.cache/puppeteer
-      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
-        value: "true"

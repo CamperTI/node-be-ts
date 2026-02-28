@@ -1,58 +1,50 @@
-FROM --platform=linux/amd64 node:22-slim
-
-# Install Chrome dependencies
-RUN apt-get update && apt-get install -y \
-  ca-certificates \
-  fonts-liberation \
-  libasound2 \
-  libatk-bridge2.0-0 \
-  libatk1.0-0 \
-  libcups2 \
-  libdbus-1-3 \
-  libdrm2 \
-  libgbm1 \
-  libgtk-3-0 \
-  libnspr4 \
-  libnss3 \
-  libx11-xcb1 \
-  libxcomposite1 \
-  libxdamage1 \
-  libxrandr2 \
-  xdg-utils \
-  wget \
-  --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/*
-
-# 👇 IMPORTANT: force puppeteer cache
-ENV PUPPETEER_CACHE_DIR=/usr/local/share/puppeteer
+# ── Stage 1: Build ─────────────────────────────────────────────────────────────
+FROM --platform=linux/amd64 node:22-slim AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
+RUN npm ci
 
-# Install all dependencies (including dev) and Chrome
-RUN npm ci \
-  && npx puppeteer browsers install chrome
-
-# Copy source files
-COPY . .
-
-# Build TypeScript
+COPY tsconfig.json ./
+COPY src ./src
 RUN npm run build
 
-# Remove devDependencies to reduce image size
-RUN npm prune --production
+# ── Stage 2: Production ────────────────────────────────────────────────────────
+FROM --platform=linux/amd64 node:22-slim AS production
 
-# Create non-root user for security
+# Install Google Chrome Stable from Google's repo — handles all its own deps
+RUN apt-get update && apt-get install -yq --no-install-recommends \
+    gnupg wget ca-certificates \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub \
+       | gpg --dearmor > /etc/apt/trusted.gpg.d/google-archive.gpg \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" \
+       > /etc/apt/sources.list.d/google.list \
+    && apt-get update && apt-get install -yq --no-install-recommends \
+       google-chrome-stable \
+    && rm -rf /var/lib/apt/lists/*
+
+# Use system Chrome instead of Puppeteer's bundled Chrome
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+ENV NODE_ENV=production
+ENV PORT=3000
+
+WORKDIR /app
+
+# Production dependencies only
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# Copy compiled JS from builder
+COPY --from=builder /app/dist ./dist
+
+# Non-root user for security
 RUN useradd -m -u 1001 nodeuser \
-  && chown -R nodeuser:nodeuser /app
+    && chown -R nodeuser:nodeuser /app
 
 USER nodeuser
 
-# Expose port (Render uses PORT env var, which defaults to 10000)
-EXPOSE 10000
-
-ENV NODE_ENV=production
+EXPOSE 3000
 
 CMD ["node", "dist/server.js"]
