@@ -4,8 +4,7 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     region: singapore # Options: oregon, ohio, frankfurt, singapore
-    plan: standard    # Puppeteer needs RAM; standard = 2GB ($25/mo)
-                      # Use "starter" ($7/mo, 512MB) only if scraping is light
+    plan: free        # Free tier = 512MB RAM, spins down after 15min inactivity
     healthCheckPath: /
     envVars:
       - key: NODE_ENV
