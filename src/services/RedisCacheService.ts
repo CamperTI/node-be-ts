@@ -6,9 +6,7 @@ export class RedisCacheService implements ICacheService {
   async get<T>(key: string): Promise<T | null> {
     if (!config.redisEnabled) return null;
     try {
-      const cached = await redis.get(key);
-      if (!cached) return null;
-      return JSON.parse(cached) as T;
+      return await redis.get<T>(key);
     } catch (err) {
       console.error(`[RedisCacheService][get] Redis not available:`, err);
       return null;
@@ -17,7 +15,7 @@ export class RedisCacheService implements ICacheService {
   async set(key: string, value: any, ttlSeconds: number): Promise<void> {
     if (!config.redisEnabled) return;
     try {
-      await redis.set(key, JSON.stringify(value), 'EX', ttlSeconds);
+      await redis.set(key, value, { ex: ttlSeconds });
     } catch (err) {
       console.error(`[RedisCacheService][set] Redis not available:`, err);
     }

@@ -3,6 +3,7 @@ import express, { Request, Response } from "express";
 import newsRoutes from "./routes/newsRoute";
 import dividendsRoutes from "./routes/dividendsRoute";
 import { resHandler } from "./middlewares/resHandler";
+import { apiKeyAuth } from "./middlewares/apiKeyAuth";
 import stocksRoute from "./routes/stocksRoute";
 import courseRoute from "./routes/courseRoute";
 // import redis from './config/redis';
@@ -17,6 +18,7 @@ app.use(cors({ origin: process.env.CORS_ORIGIN ?? "http://localhost:3001" }));
 app.use(express.json());
 
 app.use(resHandler);
+app.use(apiKeyAuth);
 
 // Routes
 app.use("/api/v1", newsRoutes);
