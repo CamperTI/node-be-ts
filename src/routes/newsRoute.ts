@@ -11,6 +11,7 @@ import { kwongwah } from "../controllers/kwongwahController";
 import { theedgemarket } from "../controllers/theedgemarketController";
 import { juejin } from "../controllers/juejinController";
 import { orientaldaily } from "../controllers/orientaldailyController";
+import { reddit } from "../controllers/redditController";
 
 const router = Router();
 
@@ -31,5 +32,7 @@ router.get("/theedgemarket", theedgemarket);
 router.get("/juejin", juejin);
 
 router.get("/orientaldaily", orientaldaily);
+
+router.get("/reddit", reddit);
 
 export default router;
