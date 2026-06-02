@@ -22,7 +22,7 @@ export const stocks = async (
 
   await acquirePageSlot();
   try {
-    const stockCodesParam = req.params.stockCode || "AAPL";
+    const stockCodesParam = (req.params.stockCode as string) || "AAPL";
     const stockCodes = stockCodesParam
       .split(",")
       .map((code: string) => code.trim().toUpperCase());
