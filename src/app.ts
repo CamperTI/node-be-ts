@@ -12,6 +12,7 @@ import courseRoute from "./routes/courseRoute";
 import ticketsRoute from "./routes/ticketsRoute";
 import freecourseRoute from "./routes/freecourseRoute";
 import fixedDepositRoute from "./routes/fixedDepositRoute";
+import fsmoneRoute from "./routes/fsmoneRoute";
 
 const app = express();
 
@@ -26,6 +27,11 @@ app.use(
 app.use(express.json());
 
 app.use(resHandler);
+
+app.get("/health", (_req: Request, res: Response) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 app.use(apiKeyAuth);
 
 // Routes
@@ -36,8 +42,9 @@ app.use("/api/v1", courseRoute);
 app.use("/api/v1", ticketsRoute);
 app.use("/api/v1", freecourseRoute);
 app.use("/api/v1", fixedDepositRoute);
+app.use("/api/v1", fsmoneRoute);
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (_req: Request, res: Response) => {
   res.send("Hello, TypeScript + Node.js + Express!");
 });
 
