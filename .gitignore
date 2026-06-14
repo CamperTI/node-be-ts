@@ -56,3 +56,4 @@ coverage/
 cypress/videos/
 cypress/screenshots/
 .playwright/
+logs/

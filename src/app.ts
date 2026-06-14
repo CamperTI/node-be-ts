@@ -1,5 +1,7 @@
 import cors from "cors";
 import express, { Request, Response } from "express";
+import morgan from "morgan";
+import logger from "./config/logger";
 import newsRoutes from "./routes/newsRoute";
 import dividendsRoutes from "./routes/dividendsRoute";
 import { resHandler } from "./middlewares/resHandler";
@@ -14,6 +16,12 @@ import fixedDepositRoute from "./routes/fixedDepositRoute";
 const app = express();
 
 app.use(cors({ origin: process.env.CORS_ORIGIN ?? "http://localhost:3001" }));
+
+app.use(
+  morgan(process.env.NODE_ENV === "production" ? "combined" : "dev", {
+    stream: { write: (message) => logger.http(message.trimEnd()) },
+  }),
+);
 
 app.use(express.json());
 

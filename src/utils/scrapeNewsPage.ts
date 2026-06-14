@@ -9,6 +9,7 @@ import {
   acquirePageSlot,
   releasePageSlot,
 } from '../config/puppeteer';
+import logger from "../config/logger";
 
 type CheerioAPI = ReturnType<typeof cheerio.load>;
 
@@ -31,12 +32,12 @@ export async function scrapeNewsPage(
     }
 
     const content = await page.content();
-    console.log('Page content preview:', content.slice(0, 500));
+    // console.log('Page content preview:', content.slice(0, 500));
     const $ = cheerio.load(content);
     const dataResponse: IEntryObject[] = [];
     const tableList = $(listSelector).children();
 
-    console.log('tablelist', tableList.length);
+    logger.debug(`Found items: ${tableList.length}`);
 
     tableList.each((_, row) => {
       const entry = mapRow($, row as unknown as AnyNode);
