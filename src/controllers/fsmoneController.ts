@@ -7,6 +7,8 @@ import {
   acquirePageSlot,
   releasePageSlot,
 } from "../config/puppeteer";
+import { cacheService } from "../services/RedisCacheService";
+import { FUND_REDIS_CACHE } from "../utils/const";
 
 const FSMONE_FACTSHEET_BASE = "https://www.fsmone.com.my/funds/tools/factsheet";
 
@@ -26,8 +28,6 @@ export const getFundPrice = async (
   res: Response,
   _next: NextFunction,
 ) => {
-  let page: Page | null = null;
-
   const fundCode = (req.query.fund as string | undefined) ?? "MYKNGAPTR";
   // The factsheet slug (path segment) can be passed via `slug` query param.
   // Defaults to the Kenanga Asia Pacific Total Return Fund.
@@ -35,7 +35,18 @@ export const getFundPrice = async (
     (req.query.slug as string | undefined) ??
     "kenanga-asia-pacific-total-return-fund";
 
+  const CACHE_KEY = `fund:fsmone:${fundCode}:${slug}`;
   const url = `${FSMONE_FACTSHEET_BASE}/${slug}?fund=${fundCode}`;
+
+  const cached = await cacheService.get(CACHE_KEY);
+  if (cached && typeof cached === "object") {
+    return res.standardResponse(
+      cached,
+      "Fund price fetched successfully (cache)",
+    );
+  }
+
+  let page: Page | null = null;
 
   await acquirePageSlot();
   try {
@@ -152,6 +163,8 @@ export const getFundPrice = async (
       changePercent: priceData.changePercent,
       url,
     };
+
+    await cacheService.set(CACHE_KEY, result, FUND_REDIS_CACHE);
 
     return res.standardResponse(result, "Fund price fetched successfully");
   } catch (error) {

@@ -34,3 +34,5 @@ export class RedisCacheService implements ICacheService {
     }
   }
 }
+
+export const cacheService = new RedisCacheService();
