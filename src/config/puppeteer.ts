@@ -174,3 +174,11 @@ export const createPage = async (browser: Browser): Promise<Page> => {
 
   return page;
 };
+
+export type BrowserStatus = "connected" | "launching" | "disconnected";
+
+export const getBrowserStatus = (): BrowserStatus => {
+  if (browserInstance && browserInstance.connected) return "connected";
+  if (browserLaunching) return "launching";
+  return "disconnected";
+};

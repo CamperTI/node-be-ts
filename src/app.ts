@@ -4,11 +4,14 @@ import morgan from "morgan";
 import logger from "./config/logger";
 import newsRoutes from "./routes/newsRoute";
 import dividendsRoutes from "./routes/dividendsRoute";
+import healthRoute from "./routes/healthRoute";
+import { errorHandler } from "./middlewares/errorHandler";
+import { requestTimeout } from "./middlewares/requestTimeout";
+import { rateLimiter } from "./middlewares/rateLimiter";
 import { resHandler } from "./middlewares/resHandler";
 import { apiKeyAuth } from "./middlewares/apiKeyAuth";
 import stocksRoute from "./routes/stocksRoute";
 import courseRoute from "./routes/courseRoute";
-// import redis from './config/redis';
 import ticketsRoute from "./routes/ticketsRoute";
 import freecourseRoute from "./routes/freecourseRoute";
 import fixedDepositRoute from "./routes/fixedDepositRoute";
@@ -28,11 +31,15 @@ app.use(express.json());
 
 app.use(resHandler);
 
-app.get("/health", (_req: Request, res: Response) => {
-  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
-});
+// Unauthenticated: must stay before apiKeyAuth for load balancer/uptime probes
+app.use(healthRoute);
 
 app.use(apiKeyAuth);
+
+// Set a request timeout of 90 seconds for all incoming requests
+app.use(requestTimeout(90_000));
+
+app.use(rateLimiter);
 
 // Routes
 app.use("/api/v1", newsRoutes);
@@ -48,13 +55,7 @@ app.get("/", (_req: Request, res: Response) => {
   res.send("Hello, TypeScript + Node.js + Express!");
 });
 
-// app.get('/hello-cache', async (req, res) => {
-//   await redis.set('hello', 'world');
-//   const value = await redis.get('hello');
-//   res.send({ value });
-// });
-
-// Global error handler (should be after routes)
-// app.use(errorHandler);
+// Global error handler (must be last, after all routes)
+app.use(errorHandler);
 
 export default app;

@@ -1,4 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
+import logger from "../config/logger";
 
 export interface AppError extends Error {
   status?: number;
@@ -6,12 +7,13 @@ export interface AppError extends Error {
 
 export const errorHandler = (
   err: AppError,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction,
 ) => {
-  console.error('errorHandle: ', err);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-  });
+  const status = err.status || 500;
+  logger.error(`[errorHandler] ${err.message}`, { stack: err.stack });
+  res
+    .status(status)
+    .json({ success: false, message: err.message || "Internal Server Error" });
 };
