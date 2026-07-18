@@ -5,6 +5,8 @@ import logger from "./config/logger";
 import newsRoutes from "./routes/newsRoute";
 import dividendsRoutes from "./routes/dividendsRoute";
 import healthRoute from "./routes/healthRoute";
+import metricsRoute from "./routes/metricsRoute";
+import { metricsMiddleware } from "./middlewares/metrics";
 import { errorHandler } from "./middlewares/errorHandler";
 import { requestTimeout } from "./middlewares/requestTimeout";
 import { rateLimiter } from "./middlewares/rateLimiter";
@@ -31,8 +33,12 @@ app.use(express.json());
 
 app.use(resHandler);
 
+// Record count + latency for every request
+app.use(metricsMiddleware);
+
 // Unauthenticated: must stay before apiKeyAuth for load balancer/uptime probes
 app.use(healthRoute);
+app.use(metricsRoute);
 
 app.use(apiKeyAuth);
 
